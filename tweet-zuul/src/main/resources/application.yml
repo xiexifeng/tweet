@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: zuul-application
+server:
+  port: 9001
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.host:127.0.0.1}:${eureka.port:8761}/eureka/
+    instance:
+      prefer-ip-address: true
+zuul:
+  ignoredServices: '*'
+  add-host-header: true
+  retryable: false #开启重试
+  ignoredPatterns: /**/admin/**
+  routes:
+    tweet-biz:
+      path: /api/**
+      serviceId: tweet-biz
+      sensitiveHeaders: Cookie,Set-Cookie,Authorization
+    tweet-users: /user/**
+ribbon:
+  MaxAutoRetries: 1 #同一个服务重试的次数(除去首次)
+  MaxAutoRetriesNextServer: 1  #切换相同服务数量
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+security:
+  oauth2:
+    client:
+      access-token-uri: http://localhost:7777/uaa/oauth/token #令牌端点
+      user-authorization-uri: http://localhost:7777/uaa/oauth/authorize
+      #授权端点
+      client-id: zuul-application #OAuth2客户端ID
+      client-secret: secret #OAuth2客户端密钥
+    resource:
+      jwt:
+        key-value: springcloud123 #使用对称加密方式，默认算法为HS256
+      user-info-uri: http://localhost:7777/uaa/users/current
